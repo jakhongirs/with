@@ -100,16 +100,16 @@ class Command(BaseCommand):
 
         letter = Letter.objects.filter(is_used=False).first()
         if letter:
-            text = f"good morning, my love! ❤️\n\n{letter.text.lower()}"
+            text = letter.text.lower()
             letter.is_used = True
             letter.save()
         else:
-            text = f"good morning, my love! ❤️\n\n{self.generate_ai_letter()}"
+            text = self.generate_ai_letter()
 
         for user in users:
             try:
                 context.bot.send_message(chat_id=user.chat_id, text=text)
-                self.add_to_history(user.chat_id, text.split("\n\n")[1])
+                self.add_to_history(user.chat_id, text)
             except Exception as e:
                 logger.error(f"Failed to send letter to {user.chat_id}: {e}")
                 user.is_active = False
@@ -117,6 +117,12 @@ class Command(BaseCommand):
 
     def command_letter(self, update: Update, context: CallbackContext):
         chat_id = str(update.effective_chat.id)
+
+        # Update user's command count
+        user = TelegramUser.objects.get(chat_id=chat_id)
+        user.letter_command_count += 1
+        user.save()
+
         ai_letter = self.generate_ai_letter(chat_id)
         update.message.reply_text(ai_letter)
 
@@ -134,9 +140,9 @@ class Command(BaseCommand):
         )
 
         update.message.reply_text(
-            "hello my love! 🌹\n"
-            "i'll send you my personal letters daily and whenever you want!\n"
-            "just use /letter to get a special letter from me ❤️"
+            "hello my love! 🌹\n\n"
+            "i'll send you my personal letters daily and whenever you want!\n\n"
+            "just use /letter to get a special letter from me ♥️"
         )
 
     def handle(self, *args, **options):
@@ -149,8 +155,10 @@ class Command(BaseCommand):
         job_queue = self.updater.job_queue
         job_queue.run_daily(
             self.send_daily_letter,
-            time=datetime.time(hour=9, minute=0),
+            time=datetime.time(hour=8, minute=0),
             days=(0, 1, 2, 3, 4, 5, 6),
+            context=None,
+            name="daily_letter",
         )
 
         self.updater.start_polling()

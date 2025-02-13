@@ -23,6 +23,9 @@ class TelegramUser(BaseModel):
         _("First Name"), max_length=255, null=True, blank=True
     )
     is_active = models.BooleanField(_("Is Active"), default=True)
+    letter_command_count = models.PositiveIntegerField(
+        _("Letter Command Count"), default=0
+    )
 
     class Meta:
         verbose_name = _("Telegram User")

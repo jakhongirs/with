@@ -12,6 +12,13 @@ class LetterAdmin(admin.ModelAdmin):
 
 @admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):
-    list_display = ("chat_id", "username", "first_name", "is_active", "created_at")
+    list_display = (
+        "chat_id",
+        "username",
+        "first_name",
+        "is_active",
+        "letter_command_count",
+        "created_at",
+    )
     list_filter = ("is_active",)
     search_fields = ("chat_id", "username", "first_name")
