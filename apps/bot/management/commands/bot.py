@@ -37,7 +37,7 @@ class Command(BaseCommand):
         cache.set(cache_key, history, timeout=60 * 60 * 24 * 30)  # 30 days
 
     def get_example_letters(self):
-        example_letters = Letter.objects.filter(is_used=False).order_by("?")[:5]
+        example_letters = Letter.objects.order_by("?")[:5]
         if not example_letters:
             example_letters = Letter.objects.all().order_by("?")[:5]
         return [letter.text.lower() for letter in example_letters]
@@ -62,26 +62,25 @@ class Command(BaseCommand):
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are me, writing short and sweet love messages to my beloved. "
-                        "Keep messages concise (1-2 sentences max), personal, and heartfelt. "
-                        "Focus on expressing one thought or feeling per message. "
-                        "Write like a human sending a loving thought, not like AI. "
-                        "Return only the message text, no quotes or formatting.",
+                        "content": "You are me, writing very short love messages to my beloved. "
+                        "Keep messages between 1-4 sentences max. "
+                        "Make it personal and sweet, like sending a quick loving thought. "
+                        "Write naturally like a human, not AI. "
+                        "Do not use complex words or poetic language. ",
                     },
                     {
                         "role": "user",
                         "content": f"{examples_prompt}\n{history_prompt}\n\nWrite a new short love message following my style:",
                     },
                 ],
-                max_tokens=60,  # Reduced token limit for shorter messages
+                max_tokens=60,  # Further reduced for shorter messages
                 temperature=0.9,
                 presence_penalty=0.8,
                 frequency_penalty=0.9,
             )
             letter = response.choices[0].message.content.strip().lower()
 
-            # Remove any quotes or extra formatting
-            letter = letter.replace('"', "").replace("...", "..").strip()
+            letter = letter.rstrip(".")
 
             if chat_id:
                 self.add_to_history(chat_id, letter)
@@ -89,7 +88,7 @@ class Command(BaseCommand):
             return letter
         except Exception as e:
             logger.error(f"Error generating AI letter: {e}")
-            return "i love you more than words can express ❤️"
+            return "i love you more than words can express"
 
     def send_daily_letter(self, context: CallbackContext):
         users = TelegramUser.objects.filter(is_active=True)
