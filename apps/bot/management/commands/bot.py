@@ -66,21 +66,23 @@ class Command(BaseCommand):
                         "Keep messages between 1-4 sentences max. "
                         "Make it personal and sweet, like sending a quick loving thought. "
                         "Write naturally like a human, not AI. "
-                        "Do not use complex words or poetic language. ",
+                        "Do not use complex words or poetic language. "
+                        "Never end messages with a dot or period. "
+                        "Occasionally (20% of the time) use relevant emojis "
+                        "where it feels natural, but don't force it. "
+                        "Never place emojis at the start of the message.",
                     },
                     {
                         "role": "user",
                         "content": f"{examples_prompt}\n{history_prompt}\n\nWrite a new short love message following my style:",
                     },
                 ],
-                max_tokens=60,  # Further reduced for shorter messages
+                max_tokens=60,
                 temperature=0.9,
                 presence_penalty=0.8,
                 frequency_penalty=0.9,
             )
             letter = response.choices[0].message.content.strip().lower()
-
-            letter = letter.rstrip(".")
 
             if chat_id:
                 self.add_to_history(chat_id, letter)
