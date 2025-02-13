@@ -104,6 +104,9 @@ class Command(BaseCommand):
             letter.is_used = True
             letter.save()
         else:
+            # Show typing for AI generation
+            for user in users:
+                context.bot.send_chat_action(chat_id=user.chat_id, action="typing")
             text = self.generate_ai_letter()
 
         for user in users:
@@ -123,6 +126,8 @@ class Command(BaseCommand):
         user.letter_command_count += 1
         user.save()
 
+        # Show typing while generating
+        context.bot.send_chat_action(chat_id=chat_id, action="typing")
         ai_letter = self.generate_ai_letter(chat_id)
         update.message.reply_text(ai_letter)
 
