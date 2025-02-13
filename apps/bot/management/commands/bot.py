@@ -145,7 +145,7 @@ class Command(BaseCommand):
         )
 
         update.message.reply_text(
-            "hello my love! 🌹\n\n"
+            "hello my love! 💌\n\n"
             "i'll send you my personal letters daily and whenever you want!\n\n"
             "just use /letter to get a special letter from me ♥️"
         )
