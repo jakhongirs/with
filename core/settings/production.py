@@ -13,8 +13,11 @@ DEBUG = False
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False
 CSRF_TRUSTED_ORIGINS = ["http://45.159.220.240:8080"]
+CSRF_COOKIE_DOMAIN = "45.159.220.240"
+CSRF_USE_SESSIONS = True
+SESSION_COOKIE_SECURE = False
 
 ###################################################################
 # CORS
