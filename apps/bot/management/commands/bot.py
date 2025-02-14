@@ -160,7 +160,7 @@ class Command(BaseCommand):
         job_queue = self.updater.job_queue
         job_queue.run_daily(
             self.send_daily_letter,
-            time=datetime.time(hour=8, minute=0),
+            time=datetime.time(hour=3, minute=0),  # 3:00 UTC = 8:00 Tashkent time
             days=(0, 1, 2, 3, 4, 5, 6),
             context=None,
             name="daily_letter",
