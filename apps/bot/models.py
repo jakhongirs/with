@@ -33,3 +33,21 @@ class TelegramUser(BaseModel):
 
     def __str__(self):
         return f"{self.username or self.chat_id}"
+
+
+class LetterHistory(BaseModel):
+    telegram_user = models.ForeignKey(
+        "TelegramUser",
+        on_delete=models.CASCADE,
+        related_name="letter_history",
+        verbose_name=_("Telegram User"),
+    )
+    letter = models.TextField(_("Letter"))
+
+    class Meta:
+        verbose_name = _("Letter History")
+        verbose_name_plural = _("Letter Histories")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.telegram_user} - {self.letter[:50]}"

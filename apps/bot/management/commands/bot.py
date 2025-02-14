@@ -3,19 +3,17 @@ import logging
 import os
 
 import openai
-from django.core.cache import cache
 from django.core.management.base import BaseCommand
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, Updater
 
-from apps.bot.models import Letter, TelegramUser
+from apps.bot.models import Letter, LetterHistory, TelegramUser
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = "Starts the Telegram bot"
-    CACHE_KEY_PREFIX = "letter_history_"
     HISTORY_SIZE = 50
 
     def __init__(self):
@@ -24,17 +22,18 @@ class Command(BaseCommand):
         self.client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def get_letter_history(self, chat_id):
-        cache_key = f"{self.CACHE_KEY_PREFIX}{chat_id}"
-        history = cache.get(cache_key, [])
-        return history
+        user = TelegramUser.objects.get(chat_id=chat_id)
+        return [
+            history.letter for history in user.letter_history.all()[: self.HISTORY_SIZE]
+        ]
 
     def add_to_history(self, chat_id, letter):
-        cache_key = f"{self.CACHE_KEY_PREFIX}{chat_id}"
-        history = self.get_letter_history(chat_id)
-        history.append(letter.lower())
-        if len(history) > self.HISTORY_SIZE:
-            history = history[-self.HISTORY_SIZE :]
-        cache.set(cache_key, history, timeout=60 * 60 * 24 * 30)  # 30 days
+        user = TelegramUser.objects.get(chat_id=chat_id)
+        LetterHistory.objects.create(telegram_user=user, letter=letter.lower())
+        # Keep only last HISTORY_SIZE letters
+        old_records = user.letter_history.all()[self.HISTORY_SIZE :]
+        if old_records:
+            user.letter_history.filter(id__in=[r.id for r in old_records]).delete()
 
     def get_example_letters(self):
         example_letters = Letter.objects.order_by("?")[:5]
@@ -122,7 +121,6 @@ class Command(BaseCommand):
         for user in users:
             try:
                 context.bot.send_message(chat_id=user.chat_id, text=text)
-                self.add_to_history(user.chat_id, text)
             except Exception as e:
                 logger.error(f"Failed to send letter to {user.chat_id}: {e}")
                 user.is_active = False
