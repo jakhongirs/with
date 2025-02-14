@@ -47,9 +47,17 @@ class Command(BaseCommand):
         example_letters = self.get_example_letters()
 
         examples_prompt = (
-            "Here are some example short love messages to understand my style:\n"
+            "Here are some example love messages to understand my style. Create a new message with completely "
+            "different meaning, emotion, and perspective:\n"
         )
-        examples_prompt += "\n".join([f"- {letter}" for letter in example_letters])
+        # Add random examples from database
+        for i, letter in enumerate(example_letters, 1):
+            examples_prompt += f"{i}. {letter}\n"
+
+        examples_prompt += (
+            "\nCreate a message that expresses a NEW feeling or perspective not covered above. "
+            "Keep it short, sweet, and genuine. Never use similar words or themes from examples"
+        )
 
         history_prompt = "\nDo not repeat these recent messages:\n"
         history_prompt += (
@@ -65,6 +73,8 @@ class Command(BaseCommand):
                         "content": "You are me, writing very short love messages to my beloved. "
                         "Keep messages between 1-4 sentences max. "
                         "Make it personal and sweet, like sending a quick loving thought. "
+                        "Never use words from example messages. "
+                        "Make each message about a different aspect of love. "
                         "Write naturally like a human, not AI. "
                         "Do not use complex words or poetic language. "
                         "Never end messages with a dot or period. "
